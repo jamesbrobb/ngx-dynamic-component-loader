@@ -16,9 +16,9 @@ To use the component loader directive do the following:
 
 **Provide a value for the `ComponentLoaderMapService` injection token**
 
-Define a [ContentLoaderMap](https://github.com/jamesbrobb/jbr/blob/main/libraries/ui/src/lib/component-loader/component-loader.service.ts#L16) for the `ComponentLoaderMapService` provider.
+Define a [ContentLoaderMap](https://github.com/jamesbrobb/ngx-dynamic-component-loader/tree/main/library/src/lib/component-loader/component-loader.service.ts#L16) for the `ComponentLoaderMapService` provider.
 
-The map defines a key value pair for each component with a value of type [ComponentLoaderConfig](https://github.com/jamesbrobb/jbr/blob/main/libraries/ui/src/lib/component-loader/component-loader.service.ts#L8).
+The map defines a key value pair for each component with a value of type [ComponentLoaderConfig](https://github.com/jamesbrobb/ngx-dynamic-component-loader/tree/main/library/src/lib/component-loader/component-loader.service.ts#L8).
 
 ```ts
 [{
