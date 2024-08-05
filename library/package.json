@@ -1,0 +1,28 @@
+{
+  "name": "ngx-dynamic-component-loader",
+  "version": "0.0.1",
+  "description": "A collection of directives and services to facilitate the dynamic loading of Angular components.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jamesbrobb/ngx-dynamic-component-loader.git"
+  },
+  "keywords": [
+    "Angular",
+    "Dynamic component loader",
+    "ngx"
+  ],
+  "author": "James Robb",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jamesbrobb/ngx-dynamic-component-loader/issues"
+  },
+  "homepage": "https://github.com/jamesbrobb/ngx-dynamic-component-loader#readme",
+  "peerDependencies": {
+    "@angular/common": "^17.3.0",
+    "@angular/core": "^17.3.0"
+  },
+  "dependencies": {
+    "tslib": "^2.3.0"
+  },
+  "sideEffects": false
+}

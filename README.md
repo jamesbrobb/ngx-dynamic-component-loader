@@ -1,27 +1,115 @@
-# NgxDynamicComponentLoader
+# Ngx Dynamic Component Loader
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 17.1.0.
+A collection of directives and services to facilitate the dynamic loading of Angular components.
 
-## Development server
+---
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+To use the component loader directive do the following:
 
-## Code scaffolding
+1) [Provide a value for the `ComponentLoaderMapService` injection token](#1)
+2) [Provide the `ComponentLoaderService` in the root of your application](#2)
+3) [Add either the `componentLoader` or `componentLoaderIO` directive](#3)
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+---
 
-## Build
+# 1.
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+**Provide a value for the `ComponentLoaderMapService` injection token**
 
-## Running unit tests
+Define a [ContentLoaderMap](https://github.com/jamesbrobb/jbr/blob/main/libraries/ui/src/lib/component-loader/component-loader.service.ts#L16) for the `ComponentLoaderMapService` provider.
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+The map defines a key value pair for each component with a value of type [ComponentLoaderConfig](https://github.com/jamesbrobb/jbr/blob/main/libraries/ui/src/lib/component-loader/component-loader.service.ts#L8).
 
-## Running end-to-end tests
+```ts
+[{
+  provide: ComponentLoaderMapService,
+  useValue: {
+    /*  
+        By default it's assumed that the component to load is
+        
+        a) standalone: true
+        b) The class name of the component to load (which is required to access the component once it's loaded)
+        follows the convention `<key>Component`
+        
+        So in the below example the component class name would be `MyStandaloneComponent` and the
+        key is the kebab-case version of the class name `my-standalone` minus 'Component'. 
+     */
+    'my-standalone': import('./path/to/my-standalone.component'),
+    /*
+        If a different key name to the component class name is required, the component name can be explicitly defined.
+     */
+    'some-other-standalone-component': {
+      import:() => import('./path/to/my-actual.component'),
+      standalone: true,
+      componentName: 'MyActualComponent'
+    },
+    /*
+        Unless explicitly specified, when loading a non standalone component it's assumed that a
+        Single Component Angular Module (SCAM pattern) is being used, whereby the module name
+        matches the component name ending in 'Module'.
+        
+        i.e. `NonStandaloneComponent` -> `NonStandaloneComponentModule`
+     */
+    'non-standalone': {
+      import:() => import('./path/to/none-standalone.component'),
+      standalone: false
+    },
+    /*
+        For non standalone components that do not follow the SCAM pattern
+        an explicit module name can be defined.
+     */
+    'non-scam-non-standalone-component': {
+      import:() => import('./path/to/non-scam-non-standalone.component'),
+      standalone: false,
+      ngModuleName: 'SomeOtherModule'
+    },
+    /*
+        The final option is for when a component class has been set as a default export.
+     */
+    'non-standalone-component-as-default-export': {
+      import:() => import('./path/to/none-standalone-component'),
+      standalone: false,
+      isDefaultExport: true
+    },
+  },
+  multi: true
+}]
+```
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+# 2.
 
-## Further help
+**Provide the `ComponentLoaderService` in the root of your application**
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+```ts
+[{
+  provide: ComponentLoaderService,
+    useFactory: (inj: Injector, map: ComponentLoaderMap) => {
+    return new ComponentLoaderService(inj, map);
+  },
+    deps: [
+    Injector,
+    ComponentLoaderMapService
+  ]
+}]
+```
+
+
+# 3.
+
+**Add either the `componentLoader` or `componentLoaderIO` directive on an `ng-container` within your markup and add the directive to your `imports` metadata**
+
+To use the standard component loader directive:
+
+```html
+<ng-container componentLoader="{{componentKeyToLoad}}"></ng-container>
+```
+
+or the component loader IO directive:
+
+```html
+<ng-container componentLoaderIO="{{componentKeyToLoad}}" [inputs]="inputsObject"></ng-container>
+```
+
+Where `inputsObject` is an object containing key value pairs where the key matches the name
+of the input and the value equals the input value type.
+
