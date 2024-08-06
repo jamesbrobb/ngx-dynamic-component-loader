@@ -12,11 +12,47 @@ To use the component loader directive do the following:
 
 ---
 
+```ts
+export type ComponentLoaderMap = {
+  [selectorOrName: string]: ComponentImportFunc | ComponentLoaderConfig
+}
+
+export type ComponentImportFunc = () => Promise<any>
+
+export type ComponentLoaderConfig = {
+  componentName?: string
+  ngModuleName?: string
+  import: ComponentImportFunc
+}
+```
+
+The default values for each `ComponentLoaderConfig` are as follows:
+
+```ts
+const map: ComponentLoaderMap = {
+  'my-component': {
+    componentName: `${selectorOrName}Component`,
+    ngModuleName: `${selectorOrName}ModuleComponent`
+  }
+}
+```
+
+Steps:
+
+1. The supplied import function is called
+2. If successful a [Module namespace object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/import#module_namespace_object) is loaded
+3. The value of `componentName` is used to retrieve the component type from the Module namespace object
+4. The value of `ngModuleName` is used to retrieve the ngModule type from the Module namespace object
+
+
+
 # 1.
 
 **Provide a value for the `ComponentLoaderMapService` injection token**
 
 Define a [ContentLoaderMap](https://github.com/jamesbrobb/ngx-dynamic-component-loader/tree/main/library/src/lib/component-loader/component-loader.service.ts#L16) for the `ComponentLoaderMapService` provider.
+
+
 
 The map defines a key value pair for each component with a value of type [ComponentLoaderConfig](https://github.com/jamesbrobb/ngx-dynamic-component-loader/tree/main/library/src/lib/component-loader/component-loader.service.ts#L8).
 
@@ -25,34 +61,18 @@ The map defines a key value pair for each component with a value of type [Compon
   provide: ComponentLoaderMapService,
   useValue: {
     /*  
-        By default it's assumed that the component to load is
-        
-        a) standalone: true
-        b) The class name of the component to load (which is required to access the component once it's loaded)
-        follows the convention `<key>Component`
-        
-        So in the below example the component class name would be `MyStandaloneComponent` and the
-        key is the kebab-case version of the class name `my-standalone` minus 'Component'. 
+        Loads either:
+          - A component of class MyStandaloneComponent
+        Or
+          - A SCAM pattern with ngModule class MyStandaloneComponentModule and component of class MyStandaloneComponent
      */
     'my-standalone': import('./path/to/my-standalone.component'),
     /*
         If a different key name to the component class name is required, the component name can be explicitly defined.
      */
-    'some-other-standalone-component': {
+    'some-other-component': {
       import:() => import('./path/to/my-actual.component'),
-      standalone: true,
       componentName: 'MyActualComponent'
-    },
-    /*
-        Unless explicitly specified, when loading a non standalone component it's assumed that a
-        Single Component Angular Module (SCAM pattern) is being used, whereby the module name
-        matches the component name ending in 'Module'.
-        
-        i.e. `NonStandaloneComponent` -> `NonStandaloneComponentModule`
-     */
-    'non-standalone': {
-      import:() => import('./path/to/none-standalone.component'),
-      standalone: false
     },
     /*
         For non standalone components that do not follow the SCAM pattern
@@ -60,16 +80,21 @@ The map defines a key value pair for each component with a value of type [Compon
      */
     'non-scam-non-standalone-component': {
       import:() => import('./path/to/non-scam-non-standalone.component'),
-      standalone: false,
       ngModuleName: 'SomeOtherModule'
     },
     /*
-        The final option is for when a component class has been set as a default export.
+      If the component is a default export
      */
-    'non-standalone-component-as-default-export': {
+    'component-is-default-export': {
+      import:() => import('./path/to/component'),
+      componentName: 'default'
+    },
+    /*
+      If the ngModule is the default export
+     */
+    'ng-module-is-default-export': {
       import:() => import('./path/to/none-standalone-component'),
-      standalone: false,
-      isDefaultExport: true
+      ngModuleName: 'default'
     },
   },
   multi: true

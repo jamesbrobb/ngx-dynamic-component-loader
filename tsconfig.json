@@ -13,6 +13,9 @@
     "paths": {
       "ngx-dynamic-component-loader": [
         "./dist/ngx-dynamic-component-loader"
+      ],
+      "@jamesbenrobb/product": [
+        "./dist/@jamesbenrobb/product"
       ]
     },
     "esModuleInterop": true,

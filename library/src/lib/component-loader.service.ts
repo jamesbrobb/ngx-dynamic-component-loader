@@ -6,10 +6,8 @@ type ComponentImportFunc = () => Promise<any>
 
 
 export type ComponentLoaderConfig = {
-  standalone?: boolean
   componentName?: string
   ngModuleName?: string
-  isDefaultExport?: boolean
   import: ComponentImportFunc
 }
 
@@ -18,8 +16,8 @@ export type ComponentLoaderMap = {
 }
 
 export type ComponentLoaderReturnType<T> = {
-  ngModuleRef: NgModuleRef<unknown> | undefined,
-  componentType: Type<T>
+  ngModuleRef?: NgModuleRef<unknown>,
+  componentType?: Type<T>
 }
 
 
@@ -56,28 +54,23 @@ export class ComponentLoaderService {
       return;
     }
 
-    let config: Required<ComponentLoaderConfig> = {
+    const config: Required<ComponentLoaderConfig> = {
         import:  typeof compDef === 'function' ? compDef : compDef.import,
-        standalone: true,
         componentName: `${StringUtils.toPascalCase(type as string)}Component`,
         ngModuleName: `${StringUtils.toPascalCase(type as string)}ComponentModule`,
-        isDefaultExport: false,
         ...typeof compDef === 'function' ? {} : compDef
       },
-      componentType: Type<T>,
-      moduleType: Type<T> | undefined,
-      ngModuleRef: NgModuleRef<unknown> | undefined;
+      module: Record<string, Type<T>> = await config.import(),
+      componentType: Type<T> | undefined = module[config.componentName],
+      moduleType: Type<T> | undefined = module[config.ngModuleName];
 
-    const module: Record<string, Type<T>> = await config.import();
+    if(!componentType) {
+      console.warn(`no component found in module for selector ${type}, expected ${config.componentName}`);
+    }
 
-    if(config.standalone) {
+    let ngModuleRef: NgModuleRef<unknown> | undefined;
 
-      componentType = config.isDefaultExport ? module['default'] : module[config.componentName];
-
-    } else {
-
-      componentType = module[config.componentName];
-      moduleType = config.isDefaultExport ? module['default'] : module[config.ngModuleName];
+    if(moduleType) {
       ngModuleRef = createNgModule(moduleType, this.#injector);
     }
 

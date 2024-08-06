@@ -1,0 +1,9 @@
+
+<select [(ngModel)]="selectedComponent">
+  <option *ngFor="let cmp of components" [value]="cmp">{{cmp}}</option>
+</select>
+
+<div class="example">
+  <ng-container componentLoader="{{selectedComponent}}">
+  </ng-container>
+</div>

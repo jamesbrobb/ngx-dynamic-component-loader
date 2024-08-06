@@ -1,7 +1,7 @@
-import {ComponentRef, Directive, inject, OnChanges, SimpleChanges} from "@angular/core";
-import {ComponentLoaderDirective} from "./component-loader.directive";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {tap} from "rxjs";
+import {ComponentRef, Directive, inject, OnChanges, SimpleChanges} from "@angular/core";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {ComponentLoaderDirective} from "./component-loader.directive";
 
 
 @Directive({
